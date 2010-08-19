@@ -5,10 +5,14 @@ String s = "Hello World";
 module mkAttempt(Empty);
    Reg#(UInt#(3)) ctr <- mkReg(0);
    
-   rule say_hello;
+   rule end_run (ctr==5);
+      $finish(0);
+   endrule
+   
+   rule say_hello(ctr<5);
       ctr <= ctr + 1;
       $display(s);
-      if (ctr == 4) $finish(0);
    endrule
+   
 endmodule
 endpackage
