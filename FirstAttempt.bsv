@@ -1,5 +1,8 @@
 package FirstAttempt;
 String s = "Hello World";
-module mkAttempt();
+module mkAttempt(Empty);
+   rule say_hello;
+      $display(s);
+   endrule
 endmodule
 endpackage
