@@ -1,5 +1,5 @@
 package FirstAttempt;
 String s = "Hello World";
-module mkAttempt;
+module mkAttempt();
 endmodule
 endpackage
