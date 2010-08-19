@@ -9,7 +9,7 @@ module mkAttempt(Empty);
       $finish(0);
    endrule
    
-   rule say_hello(ctr<5);
+   rule say_hello;
       ctr <= ctr + 1;
       $display(s);
    endrule
