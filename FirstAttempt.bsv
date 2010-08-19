@@ -1,3 +1,3 @@
 package FirstAttempt;
-	//huzzah!
+String s = "Hello World";
 endpackage
