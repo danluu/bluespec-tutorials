@@ -10,9 +10,13 @@ module mkAttempt(Empty);
    endrule
    
    rule say_hello(ctr<5);
-      ctr <= ctr + 1;
       $display(s);
    endrule
+   
+   rule inc_ctr;
+      ctr <= ctr + 1;
+   endrule      
+   
    
 endmodule
 endpackage
