@@ -3,7 +3,7 @@ import StmtFSM::*;
 
 (* synthesize *)
 module mkTbCounter();
-    Counter counter <- mkCounter();
+    Counter#(8) counter <- mkCounter();
     Reg#(Bit#(16)) state <- mkReg(0);
    
    function check(expected_val);

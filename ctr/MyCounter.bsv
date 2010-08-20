@@ -1,13 +1,12 @@
-interface Counter;
-   method Bit#(8) read();
-   method Action load(Bit#(8) newval);
+interface Counter#(type count_t);
+   method Bit#(size_t) read();
+   method Action load(Bit#(size_t) newval);
    method Action increment();
    method Action decrement();
 endinterface
 
-(* synthesize *)
 module mkCounter(Counter);
-   Reg#(Bit#(8)) value <- mkReg(0);
+   Reg#(Bit#(size_t)) value <- mkReg(0);
       
    PulseWire increment_called <- mkPulseWire();
    PulseWire decrement_called <- mkPulseWire();
@@ -20,7 +19,7 @@ module mkCounter(Counter);
       value <= value - 1;
    endrule
    
-   method Bit#(8) read();
+   method Bit#(size_t) read();
       return value;
    endmethod
    
