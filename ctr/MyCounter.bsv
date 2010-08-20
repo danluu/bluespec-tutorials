@@ -8,6 +8,17 @@ endinterface
 (* synthesize *)
 module mkCounter(Counter);
    Reg#(Bit#(8)) value <- mkReg(0);
+      
+   PulseWire increment_called <- mkPulseWire();
+   PulseWire decrement_called <- mkPulseWire();
+
+   rule do_increment(increment_called && !decrement_called);
+      value <= value + 1;
+   endrule
+
+   rule do_decrement(!increment_called && decrement_called);
+      value <= value - 1;
+   endrule
    
    method Bit#(8) read();
       return value;
@@ -18,11 +29,10 @@ module mkCounter(Counter);
    endmethod
    
    method Action increment();
-      value <= value + 1;
+      increment_called.send();
    endmethod
    
    method Action decrement();
-      value <= value - 1;
+      decrement_called.send();
    endmethod
-   
 endmodule
