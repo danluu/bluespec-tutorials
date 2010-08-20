@@ -2,6 +2,7 @@ interface Counter;
    method Bit#(8) read();
    method Action load(Bit#(8) newval);
    method Action increment();
+   method Action decrement();
 endinterface
 
 (* synthesize *)
@@ -18,5 +19,10 @@ module mkCounter(Counter);
    
    method Action increment();
       value <= value + 1;
-   endmethod   
+   endmethod
+   
+   method Action decrement();
+      value <= value - 1;
+   endmethod
+   
 endmodule
