@@ -20,15 +20,20 @@ module mkTbCounter();
       counter.load(42);
       check(42);
       action
-	 counter.increment();
-	 counter.decrement();
+	 counter.increment(5);
+	 counter.decrement(5);
 	 check(42);
       endaction
       check(42);
-      counter.increment();
-      check(43);
-      counter.decrement();
-      
+      counter.increment(2);
+      check(44);
+      counter.decrement(44);
+      check(0);
+      action
+	 counter.increment(5);
+	 counter.decrement(0);
+      endaction
+      check(5);
       $display("TESTS FINISHED");
    endseq;
    mkAutoFSM(test_seq);   
