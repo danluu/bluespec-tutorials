@@ -25,11 +25,11 @@ module mkCounter(Counter#(size_t));
       value <= value - dec_val;
    endrule
    
-   method Bit#(size_t) read();
+   method read();
       return value;
    endmethod
    
-   method Action load(Bit#(size_t) newval);
+   method Action load(newval);
       value <= newval;
    endmethod
    
