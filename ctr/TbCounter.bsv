@@ -10,6 +10,8 @@ module mkTbCounter();
       action
          if (counter.read() != expected_val)
             $display("FAIL: counter != %0d", expected_val);
+	 else
+	    $display("Checked Passed: counter = %0d", expected_val);
 	endaction
       endfunction
    
@@ -23,7 +25,10 @@ module mkTbCounter();
 	 check(42);
       endaction
       check(42);
-	 
+      counter.increment();
+      check(43);
+      counter.decrement();
+      
       $display("TESTS FINISHED");
    endseq;
    mkAutoFSM(test_seq);   
