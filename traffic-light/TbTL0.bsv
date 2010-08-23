@@ -7,6 +7,10 @@ module mkTest();
    let dut <- sysTL;
    
    Reg#(Bit#(8)) ctr <- mkReg(0);
+   
+   rule start (ctr == 0);
+      $dumpvars;
+   endrule
 
    rule go;
       ctr <= ctr + 1;
