@@ -8,22 +8,10 @@ endinterface
 module mkCounter(Counter#(size_t));
    Reg#(Bit#(size_t)) value <- mkReg(0);
       
-   Wire#(Bit#(size_t)) inc_val <- mkWire();
-   Wire#(Bit#(size_t)) dec_val <- mkWire();
+   Wire#(Bit#(size_t)) inc_val <- mkDWire(0);
+   Wire#(Bit#(size_t)) dec_val <- mkDWire(0);
    
-   
-   (* descending_urgency = "do_both, do_increment, do_decrement" *)
-   rule do_both;
-      value <= value + inc_val - dec_val;
-   endrule
-   
-   rule do_increment;
-      value <= value + inc_val;
-   endrule
-
-   rule do_decrement;
-      value <= value - dec_val;
-   endrule
+   rule do_update; value <= value + inc_val - dec_val; endrule
    
    method read();
       return value;
