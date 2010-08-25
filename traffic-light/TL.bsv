@@ -32,55 +32,63 @@ module sysTL(TL);
    Reg#(TLstates) state <- mkReg(AllRed);
    Reg#(TLstates) next_green <- mkReg(GreenNS);   
    Reg#(Time32) secs <- mkReg(0);   
+
+   Rules low_priority =
+   (rules 
+       rule inc_sec;
+	  secs <= secs + 1;
+       endrule: inc_sec
+    endrules);
    
-   rule inc_sec;
-      secs <= secs + 1;
-   endrule: inc_sec   
+   Rules high_priority =
+   (rules
+       (* preempts = "fromAllRed, inc_sec" *)
+       rule fromAllRed (state == AllRed && secs + 1 >= allRedDelay);
+	  state <= next_green;
+	  secs <= 0;
+       endrule: fromAllRed
+
+       (* preempts = "fromGreenNS, inc_sec" *)
+       rule fromGreenNS (state == GreenNS && secs + 1 >= nsGreenDelay);
+	  state <= AmberNS;
+	  secs <= 0;
+       endrule: fromGreenNS
+
+       (* preempts = "fromAmberNS, inc_sec" *)
+       rule fromAmberNS (state == AmberNS && secs + 1 >= amberDelay);
+	  state <= AllRed;
+	  secs <= 0;
+	  next_green <= GreenE;
+       endrule: fromAmberNS
+
+       (* preempts = "fromGreenE, inc_sec" *)
+       rule fromGreenE (state == GreenE && secs + 1 >= ewGreenDelay);
+	  state <= AmberE;
+	  secs <= 0;
+       endrule: fromGreenE
+
+       (* preempts = "fromAmberE, inc_sec" *)
+       rule fromAmberE (state == AmberE && secs + 1 >= amberDelay);
+	  state <= AllRed;
+	  secs <= 0;
+	  next_green <= GreenW;
+       endrule: fromAmberE
+
+       (* preempts = "fromGreenW, inc_sec" *)
+       rule fromGreenW (state == GreenW && secs + 1 >= ewGreenDelay);
+	  state <= AmberW;
+	  secs <= 0;
+       endrule: fromGreenW
+
+       (* preempts = "fromAmberW, inc_sec" *)
+       rule fromAmberW (state == AmberW && secs + 1 >= amberDelay);
+	  state <= AllRed;
+	  secs <= 0;
+	  next_green <= GreenNS;
+	endrule: fromAmberW
+    endrules);
    
-   (* preempts = "fromAllRed, inc_sec" *)
-   rule fromAllRed (state == AllRed && secs + 1 >= allRedDelay);
-      state <= next_green;
-      secs <= 0;
-   endrule: fromAllRed
-
-   (* preempts = "fromGreenNS, inc_sec" *)
-   rule fromGreenNS (state == GreenNS && secs + 1 >= nsGreenDelay);
-      state <= AmberNS;
-      secs <= 0;
-   endrule: fromGreenNS
-
-   (* preempts = "fromAmberNS, inc_sec" *)
-   rule fromAmberNS (state == AmberNS && secs + 1 >= amberDelay);
-      state <= AllRed;
-      secs <= 0;
-      next_green <= GreenE;
-   endrule: fromAmberNS
-
-   (* preempts = "fromGreenE, inc_sec" *)
-   rule fromGreenE (state == GreenE && secs + 1 >= ewGreenDelay);
-      state <= AmberE;
-      secs <= 0;
-   endrule: fromGreenE
-
-   (* preempts = "fromAmberE, inc_sec" *)
-   rule fromAmberE (state == AmberE && secs + 1 >= amberDelay);
-      state <= AllRed;
-      secs <= 0;
-      next_green <= GreenW;
-   endrule: fromAmberE
-
-   (* preempts = "fromGreenW, inc_sec" *)
-   rule fromGreenW (state == GreenW && secs + 1 >= ewGreenDelay);
-      state <= AmberW;
-      secs <= 0;
-   endrule: fromGreenW
-
-   (* preempts = "fromAmberW, inc_sec" *)
-   rule fromAmberW (state == AmberW && secs + 1 >= amberDelay);
-      state <= AllRed;
-      secs <= 0;
-      next_green <= GreenNS;
-   endrule: fromAmberW
+   addRules(rJoinPreempts(high_priority, low_priority));
    
    method lampRedNS() = (!(state == GreenNS || state == AmberNS));
    method lampAmberNS() = (state == AmberNS);
