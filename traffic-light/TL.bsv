@@ -60,6 +60,16 @@ module sysTL(TL);
    rule fromRedAfterW (state == RedAfterW);
       state <= GreenNS;
    endrule: fromRedAfterW
+   
+   method lampRedNS() = (!(state == GreenNS || state == AmberNS));
+   method lampAmberNS() = (state == AmberNS);
+   method lampGreenNS() = (state == GreenNS);
+   method lampRedE() = (!(state == GreenE || state == AmberE));
+   method lampAmberE() = (state == AmberE);
+   method lampGreenE() = (state == GreenE);
+   method lampRedW() = (!(state == GreenW || state == AmberW));
+   method lampAmberW() = (state == AmberW);
+   method lampGreenW() = (state == GreenW);   
 endmodule: sysTL
 
 endpackage: TL
