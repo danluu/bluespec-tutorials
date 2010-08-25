@@ -20,39 +20,65 @@ typedef enum {
    GreenE, AmberE,
    GreenW, AmberW} TLstates deriving (Eq, Bits);
 
+typedef UInt#(5) Time32;
+
 (* synthesize *)
 module sysTL(TL);
+   Time32 allRedDelay = 2;
+   Time32 amberDelay = 4;
+   Time32 nsGreenDelay = 20;
+   Time32 ewGreenDelay = 10;   
+   
    Reg#(TLstates) state <- mkReg(AllRed);
    Reg#(TLstates) next_green <- mkReg(GreenNS);   
-
-   rule fromAllRed (state == AllRed);
+   Reg#(Time32) secs <- mkReg(0);   
+   
+   rule inc_sec;
+      secs <= secs + 1;
+   endrule: inc_sec   
+   
+   (* preempts = "fromAllRed, inc_sec" *)
+   rule fromAllRed (state == AllRed && secs + 1 >= allRedDelay);
       state <= next_green;
+      secs <= 0;
    endrule: fromAllRed
 
-   rule fromGreenNS (state == GreenNS);
+   (* preempts = "fromGreenNS, inc_sec" *)
+   rule fromGreenNS (state == GreenNS && secs + 1 >= nsGreenDelay);
       state <= AmberNS;
+      secs <= 0;
    endrule: fromGreenNS
-   
-   rule fromAmberNS (state == AmberNS);
+
+   (* preempts = "fromAmberNS, inc_sec" *)
+   rule fromAmberNS (state == AmberNS && secs + 1 >= amberDelay);
       state <= AllRed;
+      secs <= 0;
       next_green <= GreenE;
    endrule: fromAmberNS
 
-   rule fromGreenE (state == GreenE);
+   (* preempts = "fromGreenE, inc_sec" *)
+   rule fromGreenE (state == GreenE && secs + 1 >= ewGreenDelay);
       state <= AmberE;
+      secs <= 0;
    endrule: fromGreenE
 
-   rule fromAmberE (state == AmberE);
+   (* preempts = "fromAmberE, inc_sec" *)
+   rule fromAmberE (state == AmberE && secs + 1 >= amberDelay);
       state <= AllRed;
+      secs <= 0;
       next_green <= GreenW;
    endrule: fromAmberE
 
-   rule fromGreenW (state == GreenW);
+   (* preempts = "fromGreenW, inc_sec" *)
+   rule fromGreenW (state == GreenW && secs + 1 >= ewGreenDelay);
       state <= AmberW;
+      secs <= 0;
    endrule: fromGreenW
 
-   rule fromAmberW (state == AmberW);
+   (* preempts = "fromAmberW, inc_sec" *)
+   rule fromAmberW (state == AmberW && secs + 1 >= amberDelay);
       state <= AllRed;
+      secs <= 0;
       next_green <= GreenNS;
    endrule: fromAmberW
    
