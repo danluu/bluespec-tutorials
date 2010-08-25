@@ -88,10 +88,3 @@ module mkTest();
 endmodule
 
 endpackage
-
-/* How to run without using the (relatively) heavy bluespec environment:
- 1. Using bluesim
- a. bsc -sim -g mkTest -u TbTL.bsv 
- b. bsc -sim -e mkTest
- c. ./a.out
- */

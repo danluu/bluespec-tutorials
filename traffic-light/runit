@@ -1,0 +1,5 @@
+#!/bin/bash
+
+bsc -sim -g mkTest -u TbTL.bsv
+bsc -sim -e mkTest
+./a.out
