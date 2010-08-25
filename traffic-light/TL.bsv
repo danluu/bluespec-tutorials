@@ -1,4 +1,4 @@
-package TL0;
+package TL;
 
 interface TL;
 endinterface: TL
@@ -8,6 +8,7 @@ typedef enum {
    GreenE, AmberE, RedAfterE,
    GreenW, AmberW, RedAfterW} TLstates deriving (Eq, Bits);
 
+(* synthesize *)
 module sysTL(TL);
    Reg#(TLstates) state <- mkReg(RedAfterW);
    
@@ -48,5 +49,5 @@ module sysTL(TL);
    endrule: fromRedAfterW
 endmodule: sysTL
 
-endpackage: TL0
+endpackage: TL
 
