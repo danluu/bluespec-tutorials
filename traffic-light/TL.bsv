@@ -19,8 +19,6 @@ typedef enum {
    GreenE, AmberE, RedAfterE,
    GreenW, AmberW, RedAfterW} TLstates deriving (Eq, Bits);
 
-//pointless test change to see if github picked up the amended commit correctly -- it doesn't seem to have, but maybe things will look ok if there's another commit following
-
 (* synthesize *)
 module sysTL(TL);
    Reg#(TLstates) state <- mkReg(RedAfterW);
