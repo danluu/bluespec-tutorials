@@ -34,7 +34,7 @@ endmodule
 module mkTest();
    let dut <- sysTL;
    
-   Reg#(Bit#(8)) ctr <- mkReg(0);
+   Reg#(Bit#(16)) ctr <- mkReg(0);
    
    Lamp lamps[9];   
    
@@ -56,7 +56,7 @@ module mkTest();
       ctr <= ctr + 1;
    endrule
 
-   rule stop (ctr > 128);
+   rule stop (ctr > 32768);
       $display("TESTS FINISHED");
       $finish(0);
    endrule
