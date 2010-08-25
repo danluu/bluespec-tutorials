@@ -1,6 +1,17 @@
 package TL;
 
 interface TL;
+   method Bool lampRedNS();
+   method Bool lampAmberNS();
+   method Bool lampGreenNS();
+      
+   method Bool lampRedE();
+   method Bool lampAmberE();
+   method Bool lampGreenE();
+
+   method Bool lampRedW();
+   method Bool lampAmberW();
+   method Bool lampGreenW();   
 endinterface: TL
 
 typedef enum {
