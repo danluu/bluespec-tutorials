@@ -1,6 +1,6 @@
-package TbTL0;
+package TbTL;
 
-import TL0::*;
+import TL::*;
 
 (* synthesize *)
 module mkTest();
