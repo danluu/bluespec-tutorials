@@ -55,65 +55,68 @@ module sysTL(TL);
       secs <= secs + 1;
       cycle_ctr <= clocks_per_sec;
    endrule: inc_sec   
-
+   
+   function Action next_state(TLstates ns);
+      action
+	 state <= ns;
+	 secs <= 0;
+      endaction
+   endfunction: next_state      
+   
    (* preempts = "fromAllRed, inc_sec" *)
    rule fromAllRed (state == AllRed && secs >= allRedDelay);
-      state <= (ped_button_pushed ? GreenPed : next_green);
-      secs <= 0;
+      if (ped_button_pushed)
+	 next_state(GreenPed);
+      else
+	 next_state(next_green);
+
       ped_button_pushed <= False;
    endrule: fromAllRed
    
    (* preempts = "fromGreenPed, inc_sec" *)
    rule fromGreenPed (state == GreenPed && secs >= pedGreenDelay);
-      state <= AmberPed;
-      secs <= 0;
+      next_state(AmberPed);
    endrule: fromGreenPed
    
    (* preempts = "fromAmberPed, inc_sec" *)
    rule fromAmberPed (state == AmberPed && secs >= pedAmberDelay);
-      state <= AllRed;
-      secs <= 0;
+      next_state(AllRed);
    endrule: fromAmberPed
    
    (* preempts = "fromGreenNS, inc_sec" *)
    rule fromGreenNS (state == GreenNS && secs >= nsGreenDelay);
-      state <= AmberNS;
-      secs <= 0;
+      next_state(AmberNS);
    endrule: fromGreenNS
 
    (* preempts = "fromAmberNS, inc_sec" *)
    rule fromAmberNS (state == AmberNS && secs >= amberDelay);
-      state <= AllRed;
-      secs <= 0;
+      next_state(AllRed);
       next_green <= GreenE;
    endrule: fromAmberNS
 
    (* preempts = "fromGreenE, inc_sec" *)
    rule fromGreenE (state == GreenE && secs >= ewGreenDelay);
-      state <= AmberE;
-      secs <= 0;
+      next_state(AmberE);
    endrule: fromGreenE
 
    (* preempts = "fromAmberE, inc_sec" *)
    rule fromAmberE (state == AmberE && secs >= amberDelay);
-      state <= AllRed;
-      secs <= 0;
+      next_state(AllRed);
       next_green <= GreenW;
    endrule: fromAmberE
 
    (* preempts = "fromGreenW, inc_sec" *)
    rule fromGreenW (state == GreenW && secs >= ewGreenDelay);
-      state <= AmberW;
-      secs <= 0;
+      next_state(AmberW);
    endrule: fromGreenW
 
    (* preempts = "fromAmberW, inc_sec" *)
    rule fromAmberW (state == AmberW && secs >= amberDelay);
-      state <= AllRed;
-      secs <= 0;
+      next_state(AllRed);
       next_green <= GreenNS;
    endrule: fromAmberW
-
+   
+   
    method Action ped_button_push();   
       ped_button_pushed <= True;
    endmethod: ped_button_push
