@@ -28,6 +28,7 @@ typedef enum {
    GreenPed, AmberPed} TLstates deriving (Eq, Bits);
 
 typedef UInt#(5) Time32;
+typedef UInt#(20) CtrSize;
 
 (* synthesize *)
 module sysTL(TL);
@@ -38,68 +39,76 @@ module sysTL(TL);
    Time32 pedGreenDelay = 10;
    Time32 pedAmberDelay = 6;   
    
+   CtrSize clocks_per_sec = 100;
+   
    Reg#(TLstates) state <- mkReg(AllRed);
    Reg#(TLstates) next_green <- mkReg(GreenNS);   
    Reg#(Time32) secs <- mkReg(0);   
    Reg#(Bool) ped_button_pushed <- mkReg(False);   
+   Reg#(CtrSize) cycle_ctr <- mkReg(0);
    
-   rule inc_sec;
+   rule dec_cycle_ctr (cycle_ctr != 0);
+      cycle_ctr <= cycle_ctr - 1;
+   endrule
+   
+   rule inc_sec (cycle_ctr == 0);
       secs <= secs + 1;
+      cycle_ctr <= clocks_per_sec;
    endrule: inc_sec   
 
    (* preempts = "fromAllRed, inc_sec" *)
-   rule fromAllRed (state == AllRed && secs + 1 >= allRedDelay);
+   rule fromAllRed (state == AllRed && secs >= allRedDelay);
       state <= (ped_button_pushed ? GreenPed : next_green);
       secs <= 0;
       ped_button_pushed <= False;
    endrule: fromAllRed
    
    (* preempts = "fromGreenPed, inc_sec" *)
-   rule fromGreenPed (state == GreenPed && secs + 1 >= pedGreenDelay);
+   rule fromGreenPed (state == GreenPed && secs >= pedGreenDelay);
       state <= AmberPed;
       secs <= 0;
    endrule: fromGreenPed
    
    (* preempts = "fromAmberPed, inc_sec" *)
-   rule fromAmberPed (state == AmberPed && secs + 1 >= pedAmberDelay);
+   rule fromAmberPed (state == AmberPed && secs >= pedAmberDelay);
       state <= AllRed;
       secs <= 0;
    endrule: fromAmberPed
    
    (* preempts = "fromGreenNS, inc_sec" *)
-   rule fromGreenNS (state == GreenNS && secs + 1 >= nsGreenDelay);
+   rule fromGreenNS (state == GreenNS && secs >= nsGreenDelay);
       state <= AmberNS;
       secs <= 0;
    endrule: fromGreenNS
 
    (* preempts = "fromAmberNS, inc_sec" *)
-   rule fromAmberNS (state == AmberNS && secs + 1 >= amberDelay);
+   rule fromAmberNS (state == AmberNS && secs >= amberDelay);
       state <= AllRed;
       secs <= 0;
       next_green <= GreenE;
    endrule: fromAmberNS
 
    (* preempts = "fromGreenE, inc_sec" *)
-   rule fromGreenE (state == GreenE && secs + 1 >= ewGreenDelay);
+   rule fromGreenE (state == GreenE && secs >= ewGreenDelay);
       state <= AmberE;
       secs <= 0;
    endrule: fromGreenE
 
    (* preempts = "fromAmberE, inc_sec" *)
-   rule fromAmberE (state == AmberE && secs + 1 >= amberDelay);
+   rule fromAmberE (state == AmberE && secs >= amberDelay);
       state <= AllRed;
       secs <= 0;
       next_green <= GreenW;
    endrule: fromAmberE
 
    (* preempts = "fromGreenW, inc_sec" *)
-   rule fromGreenW (state == GreenW && secs + 1 >= ewGreenDelay);
+   rule fromGreenW (state == GreenW && secs >= ewGreenDelay);
       state <= AmberW;
       secs <= 0;
    endrule: fromGreenW
 
    (* preempts = "fromAmberW, inc_sec" *)
-   rule fromAmberW (state == AmberW && secs + 1 >= amberDelay);
+   rule fromAmberW (state == AmberW && secs >= amberDelay);
       state <= AllRed;
       secs <= 0;
       next_green <= GreenNS;
