@@ -35,6 +35,11 @@ module mkTest();
    let dut <- sysTL;
    
    Reg#(Bit#(16)) ctr <- mkReg(0);
+	 
+   Reg#(Bool) carN <- mkReg(False);
+   Reg#(Bool) carS <- mkReg(False);
+   Reg#(Bool) carE <- mkReg(False);
+   Reg#(Bool) carW <- mkReg(False);	 
    
    Lamp lamps[12];   
    
@@ -55,9 +60,18 @@ module mkTest();
    rule start (ctr == 0);
       $dumpvars;
    endrule
-
+	 
+   rule detect_cars;
+      dut.set_car_state_N(carN);
+      dut.set_car_state_S(carS);
+      dut.set_car_state_E(carE);
+      dut.set_car_state_W(carW);
+   endrule	 
+	 
    rule go;
       ctr <= ctr + 1;
+      if (ctr == 5000) carN <= True;
+      if (ctr == 6500) carN <= False;			
       if (ctr == 12_000) dut.ped_button_push;      
    endrule
 
@@ -71,7 +85,7 @@ module mkTest();
 	 function do_reset(l) = l.reset;
       
 	 function do_it(f);
-      action
+			action
 				 for (Integer i=0; i<12; i=i+1)
 						f(lamps[i]);
       endaction

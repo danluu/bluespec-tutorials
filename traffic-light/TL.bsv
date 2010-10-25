@@ -2,6 +2,15 @@ package TL;
 
 interface TL;
    method Action ped_button_push();
+			
+	 (* always_enabled *)
+	 method Action set_car_state_N(Bool x);
+	 (* always_enabled *)
+	 method Action set_car_state_S(Bool x);
+	 (* always_enabled *)
+	 method Action set_car_state_E(Bool x);
+	 (* always_enabled *)
+	 method Action set_car_state_W(Bool x);			
 	 
    method Bool lampRedNS();
    method Bool lampAmberNS();
@@ -45,6 +54,9 @@ module sysTL(TL);
    Reg#(TLstates) next_green <- mkReg(GreenNS);   
    Reg#(Time32) secs <- mkReg(0);   
    Reg#(Bool) ped_button_pushed <- mkReg(False);   
+   Reg#(Bool) car_present_NS <- mkReg(True);
+   Reg#(Bool) car_present_E <- mkReg(True);
+   Reg#(Bool) car_present_W <- mkReg(True);	 
    Reg#(CtrSize) cycle_ctr <- mkReg(0);
    
    rule dec_cycle_ctr (cycle_ctr != 0);
@@ -57,20 +69,42 @@ module sysTL(TL);
    endrule: inc_sec   
    
    function Action next_state(TLstates ns);
-      action
+	 action
 				 state <= ns;
 				 secs <= 0;
       endaction
    endfunction: next_state      
+	 
+   function TLstates green_seq(TLstates x);
+      case (x)
+				 GreenNS: return (GreenE);
+				 GreenE:  return (GreenW);
+				 GreenW:  return (GreenNS);
+      endcase
+   endfunction
+
+   function Bool car_present(TLstates x);
+      case (x)
+				 GreenNS: return (car_present_NS);
+				 GreenE:  return (car_present_E);
+				 GreenW:  return (car_present_W);
+      endcase
+   endfunction
+
    
    (* preempts = "fromAllRed, inc_sec" *)
-   rule fromAllRed (state == AllRed && secs >= allRedDelay);
-      if (ped_button_pushed)
+   rule fromAllRed (state == AllRed && secs + 1 >= allRedDelay);
+      if (ped_button_pushed) action
+				 ped_button_pushed <= False;
 				 next_state(GreenPed);
-      else
+			endaction else if (car_present(next_green))
 				 next_state(next_green);
-
-      ped_button_pushed <= False;
+      else if (car_present(green_seq(next_green)))
+				 next_state(green_seq(next_green));
+      else if (car_present(green_seq(green_seq(next_green))))
+				 next_state(green_seq(green_seq(next_green)));
+      else
+				 noAction;
    endrule: fromAllRed
    
    (* preempts = "fromGreenPed, inc_sec" *)
@@ -120,6 +154,11 @@ module sysTL(TL);
    method Action ped_button_push();   
       ped_button_pushed <= True;
    endmethod: ped_button_push
+	 
+   method Action set_car_state_N(b) ; car_present_NS <= b; endmethod
+   method Action set_car_state_S(b) ; car_present_NS <= b; endmethod
+   method Action set_car_state_E(b) ; car_present_E <= b; endmethod
+   method Action set_car_state_W(b) ; car_present_W <= b; endmethod
    
    method lampRedNS() = (!(state == GreenNS || state == AmberNS));
    method lampAmberNS() = (state == AmberNS);
