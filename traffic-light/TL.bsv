@@ -65,11 +65,12 @@ module sysTL(TL);
       cycle_ctr <= cycle_ctr - 1;
    endrule
    
-   rule inc_sec (cycle_ctr == 0);
-      secs <= secs + 1;
-      cycle_ctr <= clocks_per_sec;
-   endrule: inc_sec   
-   
+   Rules low_priority_rule = (rules
+			rule inc_sec (cycle_ctr == 0);
+				 secs <= secs + 1;
+				 cycle_ctr <= clocks_per_sec;
+			endrule endrules);
+	    
    function Action next_state(TLstates ns);
 	 action
 				 state <= ns;
@@ -92,66 +93,51 @@ module sysTL(TL);
 				 GreenW:  return (car_present_W);
       endcase
    endfunction
-
+	 
+   function Rules make_from_green_rule(TLstates green_state, Time32 delay, Bool car_is_present, TLstates ns);
+			return (rules
+				 rule from_green (state == green_state && (secs >= delay || !car_is_present));
+						next_state(ns);
+				 endrule endrules);
+   endfunction: make_from_green_rule
    
-   (* preempts = "fromAllRed, inc_sec" *)
-   rule fromAllRed (state == AllRed && secs + 1 >= allRedDelay);
-      if (ped_button_pushed) action
-				 ped_button_pushed <= False;
-				 next_state(GreenPed);
-			endaction else if (car_present(next_green))
-				 next_state(next_green);
-      else if (car_present(green_seq(next_green)))
-				 next_state(green_seq(next_green));
-      else if (car_present(green_seq(green_seq(next_green))))
-				 next_state(green_seq(green_seq(next_green)));
-      else
-				 noAction;
-   endrule: fromAllRed
+   function Rules make_from_amber_rule(TLstates amber_state, TLstates ng);
+      return (rules
+				 rule from_amber (state == amber_state && secs >= amberDelay);
+						next_state(AllRed);
+						next_green <= ng;
+				 endrule endrules);
+   endfunction: make_from_amber_rule	
+
+   Rules hprs[7]; 
+	 
+   hprs[1] = make_from_green_rule(GreenNS, nsGreenDelay, car_present_NS, AmberNS);
+   hprs[2] = make_from_amber_rule(AmberNS, GreenE);
+   hprs[3] = make_from_green_rule(GreenE, ewGreenDelay, car_present_E, AmberE);
+   hprs[4] = make_from_amber_rule(AmberE, GreenW);
+   hprs[5] = make_from_green_rule(GreenW, ewGreenDelay, car_present_W, AmberW);
+   hprs[6] = make_from_amber_rule(AmberW, GreenNS);	 
    
-   (* preempts = "fromGreenPed, inc_sec" *)
-   rule fromGreenPed (state == GreenPed && secs >= pedGreenDelay);
-      next_state(AmberPed);
-   endrule: fromGreenPed
-   
-   (* preempts = "fromAmberPed, inc_sec" *)
-   rule fromAmberPed (state == AmberPed && secs >= pedAmberDelay);
-      next_state(AllRed);
-   endrule: fromAmberPed
-   
-   (* preempts = "fromGreenNS, inc_sec" *)
-   rule fromGreenNS (state == GreenNS && (secs >= nsGreenDelay || !car_present_NS));
-      next_state(AmberNS);
-   endrule: fromGreenNS
+	 hprs[0] = (rules
+			rule fromAllRed (state == AllRed && secs >= allRedDelay);
+				 if (ped_button_pushed) action
+						ped_button_pushed <= False;
+						next_state(GreenPed);
+				 endaction else if (car_present(next_green))
+			      next_state(next_green);
+			   else if (car_present(green_seq(next_green)))
+				    next_state(green_seq(next_green));
+         else if (car_present(green_seq(green_seq(next_green))))
+				    next_state(green_seq(green_seq(next_green)));
+         else
+				    noAction;
+			endrule: fromAllRed endrules);
+	 
+	 Rules high_priority_rules = hprs[0];	 
+   for (Integer i = 1; i<7; i=i+1)
+      high_priority_rules = rJoin(hprs[i], high_priority_rules);	 
 
-   (* preempts = "fromAmberNS, inc_sec" *)
-   rule fromAmberNS (state == AmberNS && secs >= amberDelay);
-      next_state(AllRed);
-      next_green <= GreenE;
-   endrule: fromAmberNS
-
-   (* preempts = "fromGreenE, inc_sec" *)
-   rule fromGreenE (state == GreenE && (secs >= ewGreenDelay || !car_present_E));
-      next_state(AmberE);
-   endrule: fromGreenE
-
-   (* preempts = "fromAmberE, inc_sec" *)
-   rule fromAmberE (state == AmberE && secs >= amberDelay);
-      next_state(AllRed);
-      next_green <= GreenW;
-   endrule: fromAmberE
-
-   (* preempts = "fromGreenW, inc_sec" *)
-   rule fromGreenW (state == GreenW && (secs >= ewGreenDelay || !car_present_W));
-      next_state(AmberW);
-   endrule: fromGreenW
-
-   (* preempts = "fromAmberW, inc_sec" *)
-   rule fromAmberW (state == AmberW && secs >= amberDelay);
-      next_state(AllRed);
-      next_green <= GreenNS;
-   endrule: fromAmberW
-   
+	 addRules(preempts(high_priority_rules, low_priority_rule));	 
    
    method Action ped_button_push();   
       ped_button_pushed <= True;
