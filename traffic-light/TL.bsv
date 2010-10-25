@@ -120,7 +120,7 @@ module sysTL(TL);
    endrule: fromAmberPed
    
    (* preempts = "fromGreenNS, inc_sec" *)
-   rule fromGreenNS (state == GreenNS && secs >= nsGreenDelay);
+   rule fromGreenNS (state == GreenNS && (secs >= nsGreenDelay || !car_present_NS));
       next_state(AmberNS);
    endrule: fromGreenNS
 
@@ -131,7 +131,7 @@ module sysTL(TL);
    endrule: fromAmberNS
 
    (* preempts = "fromGreenE, inc_sec" *)
-   rule fromGreenE (state == GreenE && secs >= ewGreenDelay);
+   rule fromGreenE (state == GreenE && (secs >= ewGreenDelay || !car_present_E));
       next_state(AmberE);
    endrule: fromGreenE
 
@@ -142,7 +142,7 @@ module sysTL(TL);
    endrule: fromAmberE
 
    (* preempts = "fromGreenW, inc_sec" *)
-   rule fromGreenW (state == GreenW && secs >= ewGreenDelay);
+   rule fromGreenW (state == GreenW && (secs >= ewGreenDelay || !car_present_W));
       next_state(AmberW);
    endrule: fromGreenW
 
