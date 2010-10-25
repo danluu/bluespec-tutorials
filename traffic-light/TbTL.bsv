@@ -16,12 +16,12 @@ module mkLamp#(String name, Bool lamp)(Lamp);
       
    method Action show_offs;
       if (prev && !lamp)
-	 $write (name + " off, ");
+				 $write (name + " off, ");
    endmethod
       
    method Action show_ons;
       if (!prev && lamp)
-	 $write (name + " on, ");
+				 $write (name + " on, ");
    endmethod
       
    method Action reset;
@@ -67,24 +67,24 @@ module mkTest();
    endrule
 
    function do_offs(l) = l.show_offs;
-   function do_ons(l) = l.show_ons;
-   function do_reset(l) = l.reset;
+	 function do_ons(l) = l.show_ons;
+	 function do_reset(l) = l.reset;
       
-   function do_it(f);
+	 function do_it(f);
       action
-	 for (Integer i=0; i<12; i=i+1)
-	    f(lamps[i]);
+				 for (Integer i=0; i<12; i=i+1)
+						f(lamps[i]);
       endaction
    endfunction
       
-   function any_changes();
+	 function any_changes();
       Bool b = False;
       for (Integer i=0; i<12; i=i+1)
-	 b = b || lamps[i].changed;
+				 b = b || lamps[i].changed;
       return b;
    endfunction
 
-   rule show (any_changes());
+	 rule show (any_changes());
       do_it(do_offs);
       do_it(do_ons);
       do_it(do_reset);

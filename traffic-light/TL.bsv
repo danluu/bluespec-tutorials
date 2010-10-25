@@ -2,7 +2,7 @@ package TL;
 
 interface TL;
    method Action ped_button_push();
-   
+	 
    method Bool lampRedNS();
    method Bool lampAmberNS();
    method Bool lampGreenNS();
@@ -21,11 +21,11 @@ interface TL;
 endinterface: TL
 
 typedef enum {
-   AllRed,
-   GreenNS, AmberNS,
-   GreenE, AmberE,
-   GreenW, AmberW,
-   GreenPed, AmberPed} TLstates deriving (Eq, Bits);
+	 AllRed,
+	 GreenNS, AmberNS,
+	 GreenE, AmberE,
+	 GreenW, AmberW,
+	 GreenPed, AmberPed} TLstates deriving (Eq, Bits);
 
 typedef UInt#(5) Time32;
 typedef UInt#(20) CtrSize;
@@ -58,17 +58,17 @@ module sysTL(TL);
    
    function Action next_state(TLstates ns);
       action
-	 state <= ns;
-	 secs <= 0;
+				 state <= ns;
+				 secs <= 0;
       endaction
    endfunction: next_state      
    
    (* preempts = "fromAllRed, inc_sec" *)
    rule fromAllRed (state == AllRed && secs >= allRedDelay);
       if (ped_button_pushed)
-	 next_state(GreenPed);
+				 next_state(GreenPed);
       else
-	 next_state(next_green);
+				 next_state(next_green);
 
       ped_button_pushed <= False;
    endrule: fromAllRed
