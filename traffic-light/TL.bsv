@@ -54,9 +54,11 @@ module sysTL(TL);
    Reg#(TLstates) next_green <- mkReg(GreenNS);   
    Reg#(Time32) secs <- mkReg(0);   
    Reg#(Bool) ped_button_pushed <- mkReg(False);   
-   Reg#(Bool) car_present_NS <- mkReg(True);
+	 Reg#(Bool) car_present_N <- mkReg(True);
+   Reg#(Bool) car_present_S <- mkReg(True);	 
    Reg#(Bool) car_present_E <- mkReg(True);
    Reg#(Bool) car_present_W <- mkReg(True);	 
+	 Bool car_present_NS = car_present_N || car_present_S;
    Reg#(CtrSize) cycle_ctr <- mkReg(0);
    
    rule dec_cycle_ctr (cycle_ctr != 0);
@@ -155,8 +157,8 @@ module sysTL(TL);
       ped_button_pushed <= True;
    endmethod: ped_button_push
 	 
-   method Action set_car_state_N(b) ; car_present_NS <= b; endmethod
-   method Action set_car_state_S(b) ; car_present_NS <= b; endmethod
+   method Action set_car_state_N(b) ; car_present_N <= b; endmethod
+   method Action set_car_state_S(b) ; car_present_S <= b; endmethod
    method Action set_car_state_E(b) ; car_present_E <= b; endmethod
    method Action set_car_state_W(b) ; car_present_W <= b; endmethod
    
