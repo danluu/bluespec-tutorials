@@ -3,18 +3,19 @@ import StmtFSM::*;
 
 
 module mkTest(); 
-	 ArithIO#(Bit#(32)) gcd <- mkGCD;	 
-	 
-	 Stmt test_seq =
-	 seq
-			gcd.start(15,25);
-			$display("Output is %d",gcd.result);
-			gcd.start(7,3);
-			$display("Output is %d",gcd.result);
-			gcd.start(4242,10000);
-			$display("Output is %d",gcd.result);
+   Reg#(Bit#(32)) n <- mkReg(1);
+   Reg#(Bit#(32)) m <- mkReg(1);
+	 ArithIO#(Bit#(32)) gcd <- mkGCD;	 	 
 
+	 Stmt test = 
+	 seq
+			for (n <= 1; n < 7; n <= n + 1) 
+				 for (m <= 1; m < 11; m <= m + 1) seq
+						gcd.start(n, m);
+						$display("gcd(%d,%d)=%d",n,m,gcd.result);
+				 endseq
 	 endseq;
 	 
-	 mkAutoFSM(test_seq);
+	 mkAutoFSM(test);
+	 
 endmodule:mkTest
