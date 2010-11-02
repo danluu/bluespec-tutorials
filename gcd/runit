@@ -1,0 +1,3 @@
+bsc -sim -g mkTest -u TbGcd.bsv
+bsc -sim -e mkTest
+./a.out
