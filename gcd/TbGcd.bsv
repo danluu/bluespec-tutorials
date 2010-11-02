@@ -3,8 +3,7 @@ import StmtFSM::*;
 
 
 module mkTest(); 
-	 ArithIO#(Bit#(32))gcd(); 
-	 mkGCD gcd_fn(gcd);
+	 ArithIO#(Bit#(32)) gcd <- mkGCD;	 
 	 
 	 Stmt test_seq =
 	 seq

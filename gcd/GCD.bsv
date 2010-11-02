@@ -6,11 +6,8 @@ interface ArithIO#(type a);
 endinterface: ArithIO 
 
 module mkGCD(ArithIO#(Bit#(size_t))); 
-	 Reg#(Bit#(size_t)) n(); 
-	 mkRegU r1(n); 
-
-	 Reg #(Bit#(size_t)) m(); 
-	 mkRegU r2(m); 
+	 Reg#(Bit#(size_t)) n <- mkRegU; 
+	 Reg #(Bit#(size_t)) m <- mkRegU; 
 	 
 	 rule swap (n > m && m != 0); 
 			n <= m; 
